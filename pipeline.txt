@@ -1,0 +1,594 @@
+Dan Shea
+F15M006C
+daniel.john.shea@gmail.com
+
+dUTP First Strand Library of Brassica rapa NV (non-vernalized) and 4V (4-weeks
+of vernalization treatment)
+
+2017.04.10
+Note: Step 1 was done during the initial analysis of the first replicate, we have
+copied it over for use with our 2 replicate analysis.
+
+********************************************************************************
+Step 1. Generating the genome indexes with hisat2-build
+********************************************************************************
+
+hisat2-build builds a HISAT2 index from a set of DNA sequences. hisat2-build 
+outputs a set of 6 files with suffixes .1.ht2, .2.ht2, .3.ht2, .4.ht2, .5.ht2, 
+.6.ht2, .7.ht2, and .8.ht2. In the case of a large index these suffixes will 
+have a ht2l termination. These files together constitute the index: they are all
+that is needed to align reads to that reference. The original sequence FASTA 
+files are no longer used by HISAT2 once the index is built.
+
+nucleus:index(1626)$ /dsu0/LocalSoftware/hisat2-2.0.4/hisat2-build -p 10 -f ../f 
+asta/Brapa_v1.5.fa Brapa_v1.5
+Settings:
+  Output files: "Brapa_v1.5.*.ht2"
+  Line rate: 6 (line is 64 bytes)
+  Lines per side: 1 (side is 64 bytes)
+  Offset rate: 4 (one in 16)
+  FTable chars: 10
+  Strings: unpacked
+  Local offset rate: 3 (one in 8)
+  Local fTable chars: 6
+  Local sequence length: 57344
+  Local sequence overlap between two consecutive indexes: 1024
+  Endianness: little
+  Actual local endianness: little
+  Sanity checking: disabled
+  Assertions: disabled
+  Random seed: 0
+  Sizeofs: void*:8, int:4, long:8, size_t:8
+Input files DNA, FASTA:
+  ../fasta/Brapa_v1.5.fa
+
+********************************OUTPUT TRUNCATED********************************
+
+Headers:
+    len: 273100332
+    gbwtLen: 273100333
+    nodes: 273100333
+    sz: 68275083
+    gbwtSz: 68275084
+    lineRate: 6
+    offRate: 4
+    offMask: 0xfffffff0
+    ftabChars: 10
+    eftabLen: 0
+    eftabSz: 0
+    ftabLen: 1048577
+    ftabSz: 4194308
+    offsLen: 17068771
+    offsSz: 68275084
+    lineSz: 64
+    sideSz: 64
+    sideGbwtSz: 48
+    sideGbwtLen: 192
+    numSides: 1422398
+    numLines: 1422398
+    gbwtTotLen: 91033472
+    gbwtTotSz: 91033472
+    reverse: 0
+    linearFM: Yes
+Total time for call to driver() for forward index: 00:08:54
+
+********************************************************************************
+Step 2. Performing the alignment with hisat2
+********************************************************************************
+
+# Tell hisat2 where to find the newly created indexes
+
+nucleus:index(10649)$ export HISAT2_INDEXES=/dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/index
+
+Note about options:
+--rna-strandness <string>
+
+Specify strand-specific information: the default is unstranded.
+For single-end reads, use F or R. 'F' means a read corresponds to a transcript.- 
+'R' means a read corresponds to the reverse complemented counterpart of a-
+transcript. For paired-end reads, use either FR or RF.
+With this option being used, every read alignment will have an XS attribute tag: 
+ '+' means a read belongs to a transcript on '+' strand of genome.-
+ '-' means a read belongs to a transcript on '-' strand of genome.
+(TopHat has a similar option, --library-type option, where-
+ fr-firststrand corresponds to R and RF;-
+ fr-secondstrand corresponds to F and FR.)-
+
+# NOTE: We have 2 replicates for each condition, each sample is aligned 
+# separately to the genome, generating a sam file for each sample.
+
+# S11 NV Sample 1
+nucleus:hisat2(10534)$ /dsu0/LocalSoftware/hisat2-2.0.4/hisat2 -p 3 -x Brapa_v1.5 -1 /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/CleanData/s11_NV/s11_NV_1.fq.gz -2 /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/CleanData/s11_NV/s11_NV_2.fq.gz --rna-strandness RF --dta --no-mixed --no-discordant -S s11_NV.sample1.sam
+89510451 reads; of these:
+  89510451 (100.00%) were paired; of these:
+    48065877 (53.70%) aligned concordantly 0 times
+    35858407 (40.06%) aligned concordantly exactly 1 time
+    5586167 (6.24%) aligned concordantly >1 times
+46.30% overall alignment rate
+
+# S11 NV Sample 2
+nucleus:hisat2(10516)$ /dsu0/LocalSoftware/hisat2-2.0.4/hisat2 -p 3 -x Brapa_v1.5 -1 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/CleanData/s11_NV/S11_NV_1.fq.gz -2 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/CleanData/s11_NV/S11_NV_2.fq.gz --rna-strandness RF --dta --no-mixed --no-discordant -S s11_NV.sample2.sam
+63858460 reads; of these:
+  63858460 (100.00%) were paired; of these:
+    35776017 (56.02%) aligned concordantly 0 times
+    24255759 (37.98%) aligned concordantly exactly 1 time
+    3826684 (5.99%) aligned concordantly >1 times
+43.98% overall alignment rate
+
+# S11 4V Sample 1
+nucleus:hisat2(10513)$ /dsu0/LocalSoftware/hisat2-2.0.4/hisat2 -p 3 -x Brapa_v1.5 -1 /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/CleanData/s11_4V/s11_4V_1.fq.gz -2 /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/CleanData/s11_4V/s11_4V_2.fq.gz --rna-strandness RF --dta --no-mixed --no-discordant -S s11_4V.sample1.sam
+77124631 reads; of these:
+  77124631 (100.00%) were paired; of these:
+    38034310 (49.32%) aligned concordantly 0 times
+    33661865 (43.65%) aligned concordantly exactly 1 time
+    5428456 (7.04%) aligned concordantly >1 times
+50.68% overall alignment rate
+
+# S11 4V Sample 2
+nucleus:hisat2(10513)$ /dsu0/LocalSoftware/hisat2-2.0.4/hisat2 -p 3 -x Brapa_v1.5 -1 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN//CleanData/s11_4V/S11_4V_1.fq.gz -2 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/CleanData/s11_4V/S11_4V_2.fq.gz --rna-strandness RF --dta --no-mixed --no-discordant -S s11_4V.sample2.sam
+63250427 reads; of these:
+  63250427 (100.00%) were paired; of these:
+    32461327 (51.32%) aligned concordantly 0 times
+    26453941 (41.82%) aligned concordantly exactly 1 time
+    4335159 (6.85%) aligned concordantly >1 times
+48.68% overall alignment rate
+
+********************************************************************************
+Step 3. Creating the sorted bam inputs for stringtie from the hisat2 sam outputs
+********************************************************************************
+# Note: this may be also done at once with:
+# samtools view -@ 10 -uh filename.sam | samtools sort -@ 10 - -o filename.sorted.bam
+
+# Convert from sam to bam, preserving the headers
+# Sort the bam files
+samtools view -@ 3 -uh s11_NV.sample1.sam | samtools sort -@ 3 - -o s11_NV.sample1.sorted.bam
+samtools view -@ 3 -uh s11_NV.sample2.sam | samtools sort -@ 3 - -o s11_NV.sample2.sorted.bam
+samtools view -@ 3 -uh s11_4V.sample1.sam | samtools sort -@ 3 - -o s11_4V.sample1.sorted.bam
+samtools view -@ 3 -uh s11_4V.sample2.sam | samtools sort -@ 3 - -o s11_4V.sample2.sorted.bam
+
+# Delete the (no longer needed) sam files
+rm s11_NV.sample1.sam s11_NV.sample2.sam s11_4V.sample1.sam s11_4V.sample2.sam
+
+********************************************************************************
+Step 4. Assembling transcripts with stringtie
+********************************************************************************
+# Note: This is run from the stringtie sub-directory
+
+# S11 NV Sample 1
+/dsu0/LocalSoftware/stringtie-1.3.0.Linux_x86_64/stringtie -p 3 -G /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o s11_NV.sample1.gtf -l s11_NV_sample1 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_NV.sample1.sorted.bam
+
+# S11 NV Sample 2
+/dsu0/LocalSoftware/stringtie-1.3.0.Linux_x86_64/stringtie -p 3 -G /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o s11_NV.sample2.gtf -l s11_NV_sample2 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_NV.sample2.sorted.bam
+
+# S11 4V Sample 1
+/dsu0/LocalSoftware/stringtie-1.3.0.Linux_x86_64/stringtie -p 3 -G /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o s11_4V.sample1.gtf -l s11_4V_sample1 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_4V.sample1.sorted.bam
+
+# S11 4V Sample 2
+/dsu0/LocalSoftware/stringtie-1.3.0.Linux_x86_64/stringtie -p 3 -G /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o s11_4V.sample2.gtf -l s11_4V_sample2 /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_4V.sample2.sorted.bam
+
+********************************************************************************
+Step 5. Merging the assembled transcripts with stringtie --merge
+********************************************************************************
+# Note: This is run from the stringtie sub-directory
+
+/dsu0/LocalSoftware/stringtie-1.3.0.Linux_x86_64/stringtie --merge -p 12 -G /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o stringtie_merged.gtf mergelist.txt
+
+********************************************************************************
+Step 6. Examine how the transcripts compare with the reference annotation
+********************************************************************************
+# Note: This is run from the stringtie sub-directory
+
+/dsu0/LocalSoftware/gffcompare-0.9.8.Linux_x86_64/gffcompare -r /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o merged stringtie_merged.gtf
+
+nucleus:stringtie(10547)$ cat merged.stats 
+# gffcompare v0.9.8 | Command line was:
+#/dsu0/LocalSoftware/gffcompare-0.9.8.Linux_x86_64/gffcompare -r /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/reference/fasta/Brapa_v1.5.gffread.fixed.gff -o merged stringtie_merged.gtf
+#
+
+#= Summary for dataset: stringtie_merged.gtf 
+#     Query mRNAs :   60852 in   43385 loci  (49780 multi-exon transcripts)
+#            (11174 multi-transcript loci, ~1.4 transcripts per locus)
+# Reference mRNAs :   41006 in   40906 loci  (32146 multi-exon)
+# Super-loci w/ reference transcripts:    40120
+#-----------------| Sensitivity | Precision  |
+        Base level:   100.0     |    82.7    |
+        Exon level:   100.0     |    81.1    |
+      Intron level:   100.0     |    88.1    |
+Intron chain level:   100.0     |    64.6    |
+  Transcript level:   100.0     |    67.4    |
+       Locus level:   100.0     |    92.9    |
+
+     Matching intron chains:   32146
+       Matching transcripts:   41006
+              Matching loci:   40906
+
+          Missed exons:       0/206421  (  0.0%)
+           Novel exons:   19476/258471  (  7.5%)
+        Missed introns:       2/165434  (  0.0%)
+         Novel introns:   12564/187689  (  6.7%)
+           Missed loci:       0/40906   (  0.0%)
+            Novel loci:    3010/43385   (  6.9%)
+
+ Total union super-loci across all input datasets: 43385 
+
+********************************************************************************
+Step 7. Compute differential gene expression using cuffquant and cuffdiff
+********************************************************************************
+# Note: This is run from the cuffdiff sub-directory
+
+# Cuffquant produces writes a single output file, abundances.cxb, into the 
+# output directory. CXB files are binary files, and can be passed to Cuffnorm or
+# Cuffdiff for further processing.
+
+# We reduce -max-bundle-frags from the default value of 1,000,000 to 250,000
+# to avoid cuffquant hanging, as per the manual's recommendation.
+
+# S11 NV Sample 1
+cuffquant -v --max-bundle-frags 250000 -p 12 --library-type fr-firststrand /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_NV.sample1.sorted.bam
+
+mv abundances.cxb s11_NV.sample1.cxb
+
+# S11 NV Sample 2
+cuffquant -v --max-bundle-frags 250000 -p 12 --library-type fr-firststrand /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_NV.sample2.sorted.bam
+
+mv abundances.cxb s11_NV.sample2.cxb
+
+# S11 4V Sample 1
+cuffquant -v --max-bundle-frags 250000 -p 12 --library-type fr-firststrand /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_4V.sample1.sorted.bam
+
+mv abundances.cxb s11_4V.sample1.cxb
+
+# S11 4V Sample 2
+cuffquant -v --max-bundle-frags 250000 -p 12 --library-type fr-firststrand /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/hisat2/s11_4V.sample2.sorted.bam
+
+mv abundances.cxb s11_4V.sample2.cxb
+
+# Differential Gene Expression Analysis using 2 replicates of each condition
+# Note: A label is specified for each condition
+cuffdiff -p 12 --library-type fr-firststrand -o cuffdiff_out --labels s11_NV,s11_4V /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf s11_NV.sample1.cxb,s11_NV.sample2.cxb s11_4V.sample1.cxb,s11_4V.sample2.cxb
+You are using Cufflinks v2.2.1, which is the most recent release.
+[02:27:02] Loading reference annotation.
+[02:27:04] Inspecting maps and determining fragment length distributions.
+[02:27:07] Modeling fragment count overdispersion.
+[02:28:02] Modeling fragment count overdispersion.
+> Map Properties:
+>       Normalized Map Mass: 20459129.32
+>       Raw Map Mass: 23410504.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+> Map Properties:
+>       Normalized Map Mass: 20459129.32
+>       Raw Map Mass: 15500634.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+> Map Properties:
+>       Normalized Map Mass: 20459129.32
+>       Raw Map Mass: 25160075.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+> Map Properties:
+>       Normalized Map Mass: 20459129.32
+>       Raw Map Mass: 19426450.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+[02:28:58] Calculating preliminary abundance estimates
+[02:28:58] Testing for differential expression and regulation in locus.
+> Processed 41360 loci.                        [*************************] 100%
+Performed 40629 isoform-level transcription difference tests
+Performed 0 tss-level transcription difference tests
+Performed 27886 gene-level transcription difference tests
+Performed 0 CDS-level transcription difference tests
+Performed 0 splicing tests
+Performed 0 promoter preference tests
+Performing 0 relative CDS output tests
+Writing isoform-level FPKM tracking
+Writing TSS group-level FPKM tracking
+Writing gene-level FPKM tracking
+Writing CDS-level FPKM tracking
+Writing isoform-level count tracking
+Writing TSS group-level count tracking
+Writing gene-level count tracking
+Writing CDS-level count tracking
+Writing isoform-level read group tracking
+Writing TSS group-level read group tracking
+Writing gene-level read group tracking
+Writing CDS-level read group tracking
+Writing read group info
+Writing run info
+
+Note: Because we had two replicates, we were able to obtain DEGs. A quick check
+of FLC and SOC1 paralogs confirms antagonistic expression profiles of the two
+sets. So it appears that the DE analysis is good. :-)
+
+******************************************************************************** 
+Step 7a. Compute differential gene expression using cuffdiff for individual replicates
+******************************************************************************** 
+
+In order to calculate the correlation of the two replicates, we compute the
+individual expression profiles for each replicate.
+
+# Differential Gene Expression Analysis of single replicates of each condition
+# Note: A label is specified for each condition
+cuffdiff -p 12 --library-type fr-firststrand -o cuffdiff_replicate_1 --labels s11_NV,s11_4V /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf s11_NV.sample1.cxb s11_4V.sample1.cxb
+Warning: Could not connect to update server to verify current version. Please check at the Cufflinks website (http://cufflinks.cbcb.umd.edu).
+[01:39:18] Loading reference annotation.
+Warning: No conditions are replicated, switching to 'blind' dispersion method
+[01:39:19] Inspecting maps and determining fragment length distributions.
+[01:39:21] Modeling fragment count overdispersion.
+> Map Properties:
+>       Normalized Map Mass: 24286530.38
+>       Raw Map Mass: 23410504.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+> Map Properties:
+>       Normalized Map Mass: 24286530.38
+>       Raw Map Mass: 25160075.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+[01:40:16] Calculating preliminary abundance estimates
+[01:40:16] Testing for differential expression and regulation in locus.
+> Processed 41360 loci.                        [*************************] 100%
+Performed 40982 isoform-level transcription difference tests
+Performed 0 tss-level transcription difference tests
+Performed 28343 gene-level transcription difference tests
+Performed 0 CDS-level transcription difference tests
+Performed 0 splicing tests
+Performed 0 promoter preference tests
+Performing 0 relative CDS output tests
+Writing isoform-level FPKM tracking
+Writing TSS group-level FPKM tracking
+Writing gene-level FPKM tracking
+Writing CDS-level FPKM tracking
+Writing isoform-level count tracking
+Writing TSS group-level count tracking
+Writing gene-level count tracking
+Writing CDS-level count tracking
+Writing isoform-level read group tracking
+Writing TSS group-level read group tracking
+Writing gene-level read group tracking
+Writing CDS-level read group tracking
+Writing read group info
+Writing run info
+
+cuffdiff -p 12 --library-type fr-firststrand -o cuffdiff_replicate_2 --labels s11_NV,s11_4V /dsu0/Research/PhD/B_rapa_rnaseq/F17FTSAPJT0114_BRAxycN/HISAT2_Stringtie_pipeline_replicates/stringtie/stringtie_merged.gtf s11_NV.sample2.cxb s11_4V.sample2.cxb
+Warning: Could not connect to update server to verify current version. Please check at the Cufflinks website (http://cufflinks.cbcb.umd.edu).
+[01:43:05] Loading reference annotation.
+Warning: No conditions are replicated, switching to 'blind' dispersion method
+[01:43:06] Inspecting maps and determining fragment length distributions.
+[01:43:08] Modeling fragment count overdispersion.
+> Map Properties:
+>       Normalized Map Mass: 17374788.64
+>       Raw Map Mass: 15500634.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+> Map Properties:
+>       Normalized Map Mass: 17374788.64
+>       Raw Map Mass: 19426450.00
+>       Fragment Length Distribution: Truncated Gaussian (default)
+>                     Default Mean: 200
+>                  Default Std Dev: 80
+[01:44:03] Calculating preliminary abundance estimates
+[01:44:03] Testing for differential expression and regulation in locus.
+> Processed 41360 loci.                        [*************************] 100%
+Performed 39850 isoform-level transcription difference tests
+Performed 0 tss-level transcription difference tests
+Performed 27584 gene-level transcription difference tests
+Performed 0 CDS-level transcription difference tests
+Performed 0 splicing tests
+Performed 0 promoter preference tests
+Performing 0 relative CDS output tests
+Writing isoform-level FPKM tracking
+Writing TSS group-level FPKM tracking
+Writing gene-level FPKM tracking
+Writing CDS-level FPKM tracking
+Writing isoform-level count tracking
+Writing TSS group-level count tracking
+Writing gene-level count tracking
+Writing CDS-level count tracking
+Writing isoform-level read group tracking
+Writing TSS group-level read group tracking
+Writing gene-level read group tracking
+Writing CDS-level read group tracking
+Writing read group info
+Writing run info
+
+********************************************************************************
+Step 8. Analysis and filtering of expression data in R, generation of plots
+********************************************************************************
+See: 
+/dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/analysis/20160929_analysis.R
+
+********************************************************************************
+Step 9. Annotation
+********************************************************************************
+# First we create the CDS sequences from the merged gtf to use as BLAST queries
+# to the swissprot database using the gffread utility.
+
+nucleus:annotation(1641)$ gffread -w transcripts.fa -g /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/reference/fasta/Brapa_v1.5.fa /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/stringtie/merged/stringtie_merged.gtf
+
+# Now we filter transcripts.fa into two files, one for the up-regulated DEGs,
+# and the other for the down-regulated DEGs
+
+# Prepare gene names from upDEGs.tsv and dnDEGs.tsv
+# If there is a gene_id but no gene, we use the gene_id because the transcript 
+# is novel, otherwise use the gene name.  We do this because transcripts.fa will
+# use a gene to describe a sequence if there is one known, otherwise the gene_id
+# will be used.
+nucleus:annotation(1730)$ cut -d'       ' -f2,3 ../upDEGs.tsv > upGenes.tsv
+nucleus:annotation(1731)$ cut -d'       ' -f2,3 ../dnDEGs.tsv > dnGenes.tsv
+
+# Create fasta files with transcripts (including isoforms) for each DEG
+nucleus:annotation(1792)$ ./makeDEGFastas.py 
+733 unique genes up-regulated
+1195 unique genes down-regulated
+751 total transcripts (including isoforms) up-regulated
+1216 total transcripts (including isoforms) down-regulated
+nucleus:annotation(1793)$ grep -c '>' up_transcripts.fa 
+751
+nucleus:annotation(1794)$ grep -c '>' dn_transcripts.fa 
+1216
+
+# Blast SwissProt database
+# The run_blast.sh script is designed to blast swissprot
+# Output results to:
+# up_swissprot.blast.results.20160930
+# dn_swissprot.blast.results.20160930
+
+# Next, using the Uniprot protein id, query the www.ebi.ac.uk QuickGO web
+# service and retrieve all of the unique GO Terms associated with that id.
+# Result files are stored in ./GO/<uniprot_id>.tsv
+# See: retrieve_GO.sh
+
+# Process the results of the GO Term retrieval, such that each id's GO Terms
+# are placed onto a ;-delimited line such that the format is as follows:
+# <GO Term> <Go Description>;<GO Term> <Go Description>;...
+# Reformatted results are placed into a single file:
+# UniProt.GO.tsv
+# See: format_GO.py
+
+# Expand out the gene_exp.diff file's lines such that when no gene is given
+# gene is '-' we fill in the value with the same value as gene_id.
+# Additionally, when there are multiple genes associated to a gene_id, make
+# each entry have its own line in the file.
+# Output file is gene_exp.expanded.diff
+# See: expandDiff.py
+
+# Merge annotations and output updated diff files for total genes & up/down
+# regulated DEGs.  Generated updated plots as well.
+# gene_exp.expanded.annotated.diff
+# gene_exp.expanded.annotated.filtered.up.diff
+# gene_exp.expanded.annotated.filtered.dn.diff
+# See: merge_annotations.R
+
+# Create data files of counts for all GO terms expressed in up and down DEG
+# groups.
+# GO_term_counts_up.tsv
+# GO_term_counts_dn.tsv
+# See: analyzeGO.py
+
+# Use R to generate bar plots of the top ten GO terms for each DEG group.
+# See: analyzeGO.R
+
+********************************************************************************
+Step 10. DEGs with no known accession in the reference
+********************************************************************************
+
+# Now we will examine the DEGs for where there is no associated reference
+# accession
+# Files will be located in:
+# /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/analysis/annotation/lncRNA_check
+nucleus:lncRNA_check(2418)$ tail -108 gene_exp.expanded.annotated.filtered.up.diff > gene_exp.expanded.annotated.filtered.up.diff.no_accession
+nucleus:lncRNA_check(2421)$ tail -114 gene_exp.expanded.annotated.filtered.dn.diff > gene_exp.expanded.annotated.filtered.dn.diff.no_accession
+
+# We will construct query fasta files that contain sequences where no known 
+# accession in the reference was found.  Then, we will blast these sequences
+# against all of the reported transcripts in the reference guided assembly,
+# looking for transcripts that match to a reverse translation of another
+# transcript.  These are likely anti-sense lncRNA transcripts.
+# See: buildQueryFastas.py
+# Outputs: 
+# filtered.dn.diff.no_accession.fa
+# filtered.up.diff.no_accession.fa
+
+# NOTE: Counts will *NOT* match because some genes have multiple isoforms
+# See below:
+# Number of transcripts is 135 for down regulated transcripts with no accession
+nucleus:lncRNA_check(2374)$ grep -c '>' filtered.dn.diff.no_accession.fa                                                                                                                  
+135
+# But only 115 genes
+nucleus:lncRNA_check(2375)$ wc -l gene_exp.expanded.annotated.filtered.dn.diff.no_accession
+115 gene_exp.expanded.annotated.filtered.dn.diff.no_accession
+# Same deal for up regulated genes
+nucleus:lncRNA_check(2376)$ grep -c '>' filtered.up.diff.no_accession.fa                                                                                                                  
+126
+nucleus:lncRNA_check(2377)$ wc -l gene_exp.expanded.annotated.filtered.up.diff.no_accession
+109 gene_exp.expanded.annotated.filtered.up.diff.no_accession
+
+# Next, we can blast these query files against all of the transcripts and report
+# all hits.
+
+# Create a local nucleotide blast db of the transcripts.fa file
+nucleus:lncRNA_check(2388)$ makeblastdb -in transcripts.fa -out transcripts -dbtype nucl -hash_index -parse_seqids                                                                        
+
+# Run the blast
+# See: blast_transcripts.sh
+
+# Then we filter the hits for matches along the anti-sense strand of a known
+# Bra accession
+nucleus:lncRNA_check(2404)$ grep 'minus' up_no.accession.blast.results.20161008| grep 'Bra' > up_no.accession.blast.results.antisense.hits.20161008
+nucleus:lncRNA_check(2405)$ grep 'minus' dn_no.accession.blast.results.20161008| grep 'Bra' > dn_no.accession.blast.results.antisense.hits.20161008
+
+# Lastly, we will report those matches where the coverage was >=60%
+# See: filterCoverage.awk
+nucleus:lncRNA_check(2421)$ ./filterCoverage.awk up_no.accession.blast.results.antisense.hits.20161008 > up_no.accession.blast.results.antisense.hits.covFiltered.20161008
+nucleus:lncRNA_check(2422)$ ./filterCoverage.awk dn_no.accession.blast.results.antisense.hits.20161008 > dn_no.accession.blast.results.antisense.hits.covFiltered.20161008
+
+# Since some hits in the output are multiple HSPs for a single gene transcript
+# pairing, we then compile out unique list of differentially expressed 
+# anti-sense transcripts.
+nucleus:lncRNA_check(2427)$ cut -d'     ' -f1,2 up_no.accession.blast.results.antisense.hits.covFiltered.20161008 | uniq > up_no.accession.blast.results.antisense.hits.covFiltered.unique.20161008
+nucleus:lncRNA_check(2428)$ cut -d'     ' -f1,2 dn_no.accession.blast.results.antisense.hits.covFiltered.20161008 | uniq > dn_no.accession.blast.results.antisense.hits.covFiltered.unique.20161008
+
+# NOTE: Some of the transcripts are matching multiple Bra genes, this is because
+# the genes are paralogs.
+# Output files:
+# up_no.accession.blast.results.antisense.hits.covFiltered.unique.20161008
+# dn_no.accession.blast.results.antisense.hits.covFiltered.unique.20161008
+
+# Total unique down regulated anti-sense transcripts
+nucleus:lncRNA_check(2432)$ cut -f1 dn_no.accession.blast.results.antisense.hits.covFiltered.unique.20161008 | grep -v qseqid | sort -u
+MSTRG.1389.1
+MSTRG.1788.1
+MSTRG.25957.1
+MSTRG.6924.1
+
+# Total unique up regulated anti-sense transcripts
+nucleus:lncRNA_check(2433)$ cut -f1 up_no.accession.blast.results.antisense.hits.covFiltered.unique.20161008 | grep -v qseqid | sort -u
+MSTRG.10630.1
+MSTRG.13318.1
+MSTRG.13805.1
+MSTRG.17943.1
+MSTRG.3706.1
+MSTRG.4797.1
+MSTRG.6699.1
+MSTRG.7351.1
+MSTRG.8512.1
+
+# Collect the annotations from Uniprot for the genes on the sense strand of the
+# identified lncRNAs
+# See: retrieve_uniprot.sh
+# Results are placed into:
+/dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/analysis/annotation/lncRNA_check/uniprot_sense_genes/
+
+# Next, we combine the results for the up and dn regulated lncRNA associated
+# sense strand genes into single files
+# See: combine.sh
+# Outputs are:
+dn.lncrna.sense.genes.uniprot.annotations.tsv
+up.lncrna.sense.genes.uniprot.annotations.tsv
+
+# Add a header to the combined outputs
+nucleus:uniprot_sense_genes(2505)$ foo=$(head -1 dn_Bra032234.tsv); echo "gene  $foo" | cat - dn.lncrna.sense.genes.uniprot.annotations.tsv > aaa; mv aaa dn.lncrna.sense.genes.uniprot.annotations.tsv;unset foo
+nucleus:uniprot_sense_genes(2506)$ foo=$(head -1 dn_Bra032234.tsv); echo "gene  $foo" | cat - up.lncrna.sense.genes.uniprot.annotations.tsv > aaa; mv aaa up.lncrna.sense.genes.uniprot.annotations.tsv;unset foo
+
+********************************************************************************
+Step 11. FLC analysis
+********************************************************************************
+
+# Loaded transcriptomes and reference into IGV to visualize FLC loci
+# Extracted the per-condition transcripts to filter sequences of interest
+nucleus:s11_NV(2383)$ gffread -w s11_NV.fa -g /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/reference/fasta/Brapa_v1.5.fa s11_NV.gtf 
+nucleus:s11_4V(2385)$ gffread -w s11_4V.fa -g /dsu0/Research/PhD/B_rapa_rnaseq/F16FTSAPJT0119_BRAvaaN/HISAT2_Stringtie_pipeline/reference/fasta/Brapa_v1.5.fa s11_4V.gtf 
+nucleus:s11_4V(2387)$ mv s11_4V.fa ../../analysis/IGV/FLC_seqs/
+nucleus:s11_NV(2389)$ mv s11_NV.fa ../../analysis/IGV/FLC_seqs/
+# See: extractTargetTranscripts.py
+# Outputs are:
+# s11_NV_FLC_antisense.fa
+# s11_4V_FLC_antisense.fa
